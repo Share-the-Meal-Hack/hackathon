@@ -12,6 +12,7 @@ const countries_hash = countries_list.reduce((memo, elem) => {
 const SocksConnection = require('socksjs');
 const mysql = require('mysql2');
 const fixieUrl = process.env.FIXIE_SOCKS_HOST;
+console.log('wat' + fixieUrl);
 const fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
 
 const port = process.env.PORT || 3001;
