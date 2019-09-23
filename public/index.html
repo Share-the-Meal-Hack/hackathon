@@ -23,8 +23,9 @@ mapboxgl.accessToken = 'pk.eyJ1IjoidmljZW50ZW11bmRpbSIsImEiOiJjazB3OWZiOXMwMDBtM
 var map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/dark-v10',
-  center: [-103.59179687498357, 40.66995747013945],
-  zoom: 3
+  center: [10.451526,51.165691],
+  zoom: 2,
+  maxZoom: 4
 });
 
 var countryRealtimeUrl = "/country.json";
@@ -33,7 +34,7 @@ var teamInput = document.getElementById("team");
 teamInput.addEventListener('change', function() {
   var teamId = teamInput.value;
   if (teamId != "") {
-    var url = "/team/" + teamInput.value + ".json";
+    var url = "/team/" + teamInput.value;
 
     map.getSource("countries").setData(url);
   } else {

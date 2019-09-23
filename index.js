@@ -62,20 +62,26 @@ app.get("/team/:team_id", async (req, res) => {
   let { team_id } = req.params;
 
     try {
-    var sql = "select users_live.country, donations_live.team_id, sum(donations_live.meals) as meals_sum from donations_live, users_live where donations_live.user_id in (select distinct users_live.user_id) and donations_live.team_id = '"+team_id+"' GROUP BY users_live.country, donations_live.team_id order by meals_sum desc;";
+    var sql = "select users_live.country, donations_live.team_id, sum(donations_live.meals) as meals_sum from donations_live, users_live where users_live.country is not NULL and donations_live.user_id in (select distinct users_live.user_id) and donations_live.team_id = '"+team_id+"' GROUP BY users_live.country, donations_live.team_id order by meals_sum desc;";
     //var sql = "SELECT * FROM etl_airbnb.users_live limit 10;";
     //var sql = "SELECT * FROM etl_airbnb.users_live limit 10;";
-    con.query(sql, function (err, result) {
-    if (err)
-    {
-      throw err;
-    } 
-        res.status(200).json({
-      data: result
-    });
-
-    console.log("Result: " + result);
+    con.query(
+    sql,
+    (err, rows) => {
+      if(err) throw err;
+      var ret = [];
+      rows.forEach(element => {
+        var country = countries_hash[element.country];
+        if(country)
+          ret.push({ "type": "Feature", "properties": { "meals": element.meals_sum, country: element.country }, "geometry": { "type": "Point", "coordinates": [ countries_hash[element.country].longitude, countries_hash[element.country].latitude, 0.0 ] } },);
       });
+      res.send({
+        "type": "FeatureCollection",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+        "features": ret
+      }
+    )
+  });
 
 
   } catch (err) {
@@ -103,38 +109,6 @@ app.get('/country.json', (req, res) => {
     )
   });
 })
-
-app.get('/team/:teamId.json', (req, res) => {
-  res.send({
-    "type": "FeatureCollection",
-    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-    "features": [
-      { "type": "Feature", "properties": { "id": "ak16994521", "meals": 3 }, "geometry": { "type": "Point", "coordinates": [ -151.5129, 63.1016, 0.0 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994519", "meals": 7 }, "geometry": { "type": "Point", "coordinates": [ -150.4048, 63.1224, 105.5 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994517", "meals": 6 }, "geometry": { "type": "Point", "coordinates": [ -151.3597, 63.0781, 0.0 ] } },
-      { "type": "Feature", "properties": { "id": "ci38021336", "meals": 42 }, "geometry": { "type": "Point", "coordinates": [ -118.497, 34.299667, 7.64 ] } },
-      { "type": "Feature", "properties": { "id": "us2000b2nn", "meals": 2 }, "geometry": { "type": "Point", "coordinates": [ -87.6901, 12.0623, 46.41 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994510", "meals": 6 }, "geometry": { "type": "Point", "coordinates": [ -151.5053, 63.0719, 0.0 ] } },
-      { "type": "Feature", "properties": { "id": "us2000b2nb", "meals": 6 }, "geometry": { "type": "Point", "coordinates": [ -178.4576, -20.2873, 614.26 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994298", "meals": 4 }, "geometry": { "type": "Point", "coordinates": [ -148.789, 63.1725, 7.5 ] } },
-      { "type": "Feature", "properties": { "id": "nc72905861", "meals": 39 }, "geometry": { "type": "Point", "coordinates": [ -120.993164, 36.421833, 6.37 ] } },
-      { "type": "Feature", "properties": { "id": "ci38021304", "meals": 11 }, "geometry": { "type": "Point", "coordinates": [ -117.0155, 33.656333, 12.37 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994293", "meals": 5 }, "geometry": { "type": "Point", "coordinates": [ -151.512, 63.0879, 10.8 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994287", "meals": 0 }, "geometry": { "type": "Point", "coordinates": [ -151.4378, 63.0933, 0.0 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994285", "meals": 5 }, "geometry": { "type": "Point", "coordinates": [ -149.6538, 63.2272, 96.8 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994283", "meals": 4 }, "geometry": { "type": "Point", "coordinates": [ -151.5325, 63.0844, 0.0 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994280", "meals": 3 }, "geometry": { "type": "Point", "coordinates": [ -149.4752, 61.8518, 54.3 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994278", "meals": 8 }, "geometry": { "type": "Point", "coordinates": [ -150.8597, 61.6214, 50.0 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994274", "meals": 9 }, "geometry": { "type": "Point", "coordinates": [ -149.7142, 62.9656, 93.6 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994273", "meals": 2 }, "geometry": { "type": "Point", "coordinates": [ -151.2484, 61.2705, 69.1 ] } },
-      { "type": "Feature", "properties": { "id": "ak16994270", "meals": 0 }, "geometry": { "type": "Point", "coordinates": [ -152.0732, 65.5942, 14.8 ] } },
-      { "type": "Feature", "properties": { "id": "us2000b2ly", "meals": 1 }, "geometry": { "type": "Point", "coordinates": [ -90.5445, 13.5146, 54.36 ] } },
-      { "type": "Feature", "properties": { "id": "nc72905841", "meals": 38 }, "geometry": { "type": "Point", "coordinates": [ -118.819504, 37.605499, 4.14 ] } },
-      { "type": "Feature", "properties": { "id": "nc72905836", "meals": 4 }, "geometry": { "type": "Point", "coordinates": [ -118.930168, 37.636833, -0.71 ] } },
-      { "type": "Feature", "properties": { "id": "ci38021272", "meals": 34 }, "geometry": { "type": "Point", "coordinates": [ -117.509167, 34.1555, 16.34 ] } },
-    ]
-  }
-)})
 
 app.listen(port, function() {
   console.log("Runnning on " + port);
