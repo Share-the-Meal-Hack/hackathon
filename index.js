@@ -8,7 +8,11 @@ const countries_hash = countries_list.reduce((memo, elem) => {
   memo[elem.country] = elem;
   return memo;
 }, {})
-var mysql = require('mysql');
+//var mysql = require('mysql');
+const SocksConnection = require('socksjs');
+const mysql = require('mysql2');
+const fixieUrl = process.env.FIXIE_SOCKS_HOST;
+const fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
 
 const port = process.env.PORT || 3001;
 
@@ -20,17 +24,45 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var con = mysql.createConnection({
+// var con = mysql.createConnection({
+//   host: process.env.dbhost,
+//   user: process.env.dbuser,
+//   password: process.env.dbpassword,
+//   database: 'etl_airbnb'
+// });
+
+// con.connect(function(err) {
+//   if (err) throw err;
+//   console.log("Connected!");
+// });
+
+
+const mysqlServer = {
   host: process.env.dbhost,
-  user: process.env.dbuser,
-  password: process.env.dbpassword,
-  database: 'etl_airbnb'
+  port: 3306
+};
+
+const dbUser = process.env.dbuser;
+const dbPassword = process.env.dbpassword;
+const db = 'etl_airbnb';
+
+const fixieConnection = new SocksConnection(mysqlServer, {
+  user: fixieValues[0],
+  pass: fixieValues[1],
+  host: fixieValues[2],
+  port: fixieValues[3],
 });
 
-con.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
+var con = mysql.createConnection({
+  user: dbUser,
+  password: dbPassword,
+  database: db,
+  stream: fixieConnection
 });
+
+
+
+
 
 app.get("/list", async (req, res) => {
   try {
@@ -41,7 +73,7 @@ app.get("/list", async (req, res) => {
     if (err)
     {
       throw err;
-    } 
+    }
         res.status(200).json({
       data: result
     });
