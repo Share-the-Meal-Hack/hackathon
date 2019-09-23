@@ -11,7 +11,8 @@ const countries_hash = countries_list.reduce((memo, elem) => {
 //var mysql = require('mysql');
 const SocksConnection = require('socksjs');
 const mysql = require('mysql2');
-const fixieUrl = process.env.FIXIE_SOCKS_HOST;
+// const fixieUrl = process.env.FIXIE_SOCKS_HOST;
+const fixieUrl = 'fixie:ea3XRkOvLparGZf@speedway.usefixie.com:1080';
 console.log('wat' + fixieUrl);
 const fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
 
