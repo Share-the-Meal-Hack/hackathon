@@ -74,6 +74,7 @@ app.get("/team/:team_id", async (req, res) => {
         var country = countries_hash[element.country];
         if(country)
           ret.push({ "type": "Feature", "properties": { "meals": element.meals_sum, country: element.country }, "geometry": { "type": "Point", "coordinates": [ countries_hash[element.country].longitude, countries_hash[element.country].latitude, 0.0 ] } },);
+          ret.push({ "type": "Feature", "properties": { "meals": 0, country: element.country }, "geometry": { "type": "Point", "coordinates": [ countries_hash[element.country].longitude, countries_hash[element.country].latitude, 0.0 ] } },);
       });
       res.send({
         "type": "FeatureCollection",
@@ -100,6 +101,7 @@ app.get('/country.json', (req, res) => {
       var ret = [];
       rows.forEach(element => {
         ret.push({ "type": "Feature", "properties": { "meals": element.meals_sum, country: element.country }, "geometry": { "type": "Point", "coordinates": [ countries_hash[element.country].longitude, countries_hash[element.country].latitude, 0.0 ] } },)
+        ret.push({ "type": "Feature", "properties": { "meals": 0, country: element.country }, "geometry": { "type": "Point", "coordinates": [ countries_hash[element.country].longitude, countries_hash[element.country].latitude, 0.0 ] } },);
       });
       res.send({
         "type": "FeatureCollection",
