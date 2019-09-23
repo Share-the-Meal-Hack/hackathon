@@ -15,7 +15,6 @@ const mysql = require('mysql2');
 const fixieUrl = process.env.FIXIE_SOCKS_HOST;
 //const fixieUrl = 'fixie:ea3XRkOvLparGZf@speedway.usefixie.com:1080';
 console.log('wat' + fixieUrl);
-const fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
 
 const port = process.env.PORT || 3001;
 
@@ -27,45 +26,45 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// var con = mysql.createConnection({
-//   host: process.env.dbhost,
-//   user: process.env.dbuser,
-//   password: process.env.dbpassword,
-//   database: 'etl_airbnb'
-// });
+var con
+if (!fixieUrl) {
+  con = mysql.createConnection({
+    host: process.env.dbhost,
+    user: process.env.dbuser,
+    password: process.env.dbpassword,
+    database: 'etl_airbnb'
+  });
 
-// con.connect(function(err) {
-//   if (err) throw err;
-//   console.log("Connected!");
-// });
+  con.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!");
+  });
+} else {
+  const fixieValues = fixieUrl.split(new RegExp('[/(:\\/@)/]+'));
 
+  const mysqlServer = {
+    host: process.env.dbhost,
+    port: 3306
+  };
 
+  const dbUser = process.env.dbuser;
+  const dbPassword = process.env.dbpassword;
+  const db = 'etl_airbnb';
 
-const mysqlServer = {
-  host: process.env.dbhost,
-  port: 3306
-};
+  const fixieConnection = new SocksConnection(mysqlServer, {
+    user: fixieValues[0],
+    pass: fixieValues[1],
+    host: fixieValues[2],
+    port: fixieValues[3],
+  });
 
-const dbUser = process.env.dbuser;
-const dbPassword = process.env.dbpassword;
-const db = 'etl_airbnb';
-
-const fixieConnection = new SocksConnection(mysqlServer, {
-  user: fixieValues[0],
-  pass: fixieValues[1],
-  host: fixieValues[2],
-  port: fixieValues[3],
-});
-
-var con = mysql.createConnection({
-  user: dbUser,
-  password: dbPassword,
-  database: db,
-  stream: fixieConnection
-});
-
-
-
+  var con = mysql.createConnection({
+    user: dbUser,
+    password: dbPassword,
+    database: db,
+    stream: fixieConnection
+  });
+}
 
 
 app.get("/list", async (req, res) => {
